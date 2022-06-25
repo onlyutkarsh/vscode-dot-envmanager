@@ -1,13 +1,16 @@
 import * as vscode from "vscode";
+import CommandsHandler from "./handlers/commandsHandler";
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate({ subscriptions, storageUri }: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "envmanager" is now active!');
 
-  let disposable = vscode.commands.registerCommand("envmanager.helloWorld", () => {
-    vscode.window.showInformationMessage("Hello World from .env Manager!");
-  });
+  // Making sure a workspace is opened so we can assert workspace related objects later
+  if (storageUri === undefined) {
+    vscode.window.showWarningMessage("No workspace open");
+  }
 
-  context.subscriptions.push(disposable);
+  const commandHandler = new CommandsHandler();
+  subscriptions.push(...commandHandler.getCommands());
 }
 
 // this method is called when your extension is deactivated
