@@ -18,9 +18,18 @@
     "commands": [
       {
         "command": "envmanager.helloWorld",
-        "title": "Hello World"
+        "title": "Add to .env"
       }
-    ]
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorLangId == javascript || editorLangId == azcli || editorLangId == typescript",
+          "command": "envmanager.helloWorld",
+          "group": "envManagerMenus@1"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run -S esbuild-base -- --minify",
