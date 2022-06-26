@@ -3,6 +3,6 @@ export function toUpper(input: string): string {
 }
 
 export function toEnvironmentVariable(input: string): string {
-  let envVariable = input.replace(/['"]+/g, "").replace(" ", "_");
+  let envVariable = input.replace(/[\\$'"]+/g, "").replace(" ", "_");
   return envVariable.toUpperCase();
 }
