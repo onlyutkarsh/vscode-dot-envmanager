@@ -17,15 +17,15 @@
   "contributes": {
     "commands": [
       {
-        "command": "envmanager.helloWorld",
-        "title": "Add to .env"
+        "command": "envmanager.addToEnv",
+        "title": ".env Manager: Add to .env"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "when": "editorLangId == javascript || editorLangId == azcli || editorLangId == typescript",
-          "command": "envmanager.helloWorld",
+          "when": "editorLangId == javascript || editorLangId == azcli || editorLangId == typescript || editorLangId == dockerfile",
+          "command": "envmanager.addToEnv",
           "group": "envManagerMenus@1"
         }
       ]

@@ -1,10 +1,10 @@
 import { commands, Disposable } from "vscode";
-import { helloWorld } from "../commands/helloWorldCommand";
+import { addToEnv } from "../commands/addToEnvCommand";
 export default class CommandsHandler {
   private commandsList: Disposable[] = [];
 
   constructor() {
-    this.registerCommand("envmanager.helloWorld", () => helloWorld("utkarsh"));
+    this.registerCommand("envmanager.addToEnv", () => addToEnv());
   }
 
   public getCommands = () => this.commandsList;
