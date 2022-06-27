@@ -1,7 +1,7 @@
-import fs from "fs/promises";
-import os from "os";
+import * as fs from "fs/promises";
+import * as os from "os";
 import { window } from "vscode";
-import { getSelectedText } from "../handlers/activeEditorHandler";
+import { getSelectedText, replaceText } from "../handlers/activeEditorHandler";
 import { fileExists, getRootEnvFile } from "../handlers/envHandler";
 
 export async function addToEnv() {
@@ -9,23 +9,26 @@ export async function addToEnv() {
   let includeInQuotes = /\s/.test(selected);
   let value = includeInQuotes ? `'${selected}'` : selected;
   let envVariable = "VAR_NAME";
-  let envLine = `${envVariable}=${value}`;
-  let final =
+
+  envVariable =
     (await window.showInputBox({
       ignoreFocusOut: true,
-      placeHolder: envLine,
-      prompt: "Enter a name for the environment variable",
-      title: "Add to .env",
-      value: envLine,
+      placeHolder: envVariable,
+      prompt: `Add to .env file`,
+      title: "Env Manager - Add to .env",
+      value: envVariable,
       valueSelection: [0, envVariable.length],
       validateInput: (text) => {
         return text === undefined || text.trim() === "" ? "This is not a valid input!" : null;
       },
     })) || "";
+  let envLine = `${envVariable}=${value}`;
 
   var { envFile, rootFolder } = await getRootEnvFile();
-  if (final !== "" && (await fileExists(envFile))) {
-    await fs.appendFile(envFile.fsPath, `${final}${os.EOL}`, "utf8");
-    window.showInformationMessage(`Added ${final} to .env`);
+  if (envVariable.length > 0 && (await fileExists(envFile))) {
+    await fs.appendFile(envFile.fsPath, `${envLine}${os.EOL}`, "utf8");
+    replaceText(envVariable);
+
+    window.showInformationMessage(`Env Manager - Added ${envVariable} to .env`);
   }
 }
