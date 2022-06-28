@@ -11,20 +11,21 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "onCommand:envmanager.addToEnv"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "envmanager.addToEnv",
-        "title": ".env Manager: Add to .env"
+        "title": ".env Manager: Add to .env",
+        "enablement": "editorHasSelection"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "when": "editorLangId == javascript || editorLangId == azcli || editorLangId == typescript || editorLangId == dockerfile",
+          "when": "editorHasSelection",
           "command": "envmanager.addToEnv",
           "group": "envManagerMenus@1"
         }

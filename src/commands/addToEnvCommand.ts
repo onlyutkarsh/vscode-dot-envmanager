@@ -4,6 +4,7 @@ import * as path from "path";
 import { Uri, window } from "vscode";
 import { getSelectedText, replaceText } from "../handlers/activeEditorHandler";
 import { getRootEnvFile } from "../handlers/envHandler";
+
 export async function addToEnv() {
   let { envFile, rootFolder } = await getRootEnvFile();
   if (envFile !== undefined) {
@@ -26,8 +27,11 @@ export async function addToEnv() {
     }
   }
 }
+
 async function addLineToEnv(envFile: Uri) {
-  let selected = getSelectedText().trim() || "VALUE";
+  let selected = getSelectedText().trim();
+  if (selected !== undefined) {
+  }
   let includeInQuotes = /\s/.test(selected);
   let value = includeInQuotes ? `'${selected}'` : selected;
   let envVariable = "VAR_NAME";
@@ -36,8 +40,8 @@ async function addLineToEnv(envFile: Uri) {
     (await window.showInputBox({
       ignoreFocusOut: true,
       placeHolder: envVariable,
-      prompt: `Add to .env file`,
-      title: "Env Manager: Add to .env",
+      prompt: `Enter a name for environment variable`,
+      title: ".env Manager: Add to .env",
       value: envVariable,
       valueSelection: [0, envVariable.length],
       validateInput: (text) => {
@@ -49,5 +53,5 @@ async function addLineToEnv(envFile: Uri) {
   await fs.appendFile(envFile.fsPath, `${envLine}${os.EOL}`, "utf8");
   replaceText(envVariable);
 
-  window.showInformationMessage(`Env Manager: Added ${envVariable} to .env`);
+  window.showInformationMessage(`.env Manager: Added ${envVariable} to .env`);
 }
