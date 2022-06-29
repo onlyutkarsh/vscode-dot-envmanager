@@ -1,14 +1,18 @@
 import { TextDecoder } from "util";
 import * as vscode from "vscode";
+import { Logger } from "../utilities/logger";
 
 export async function getRootEnvFile(): Promise<{ envFile: vscode.Uri; rootFolder: vscode.Uri | undefined }> {
+  Logger.instance.logInfo("Searching *.env file in the workspace root");
   const [envFile] = await vscode.workspace.findFiles("*.env", undefined, 1);
   let rootFolder = undefined;
   if (vscode.workspace.workspaceFolders) {
     // a workspace is open
     rootFolder = vscode.workspace.workspaceFolders[0].uri;
+    Logger.instance.logInfo("Workspace has a folder open");
     return { envFile, rootFolder };
   }
+  Logger.instance.logWarning("No workspace folders open");
   return { envFile, rootFolder };
 }
 

@@ -5,7 +5,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { OutputChannel, window } from "vscode";
-import { Application } from "../constants";
+import { Application } from "./constants";
 import { Disposable } from "./disposable";
 
 type LogLevel = "INFO" | "WARN" | "ERROR";
