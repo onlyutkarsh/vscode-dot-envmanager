@@ -1,64 +1,74 @@
 import * as fs from "fs/promises";
 import * as os from "os";
 import * as path from "path";
-import { ProgressLocation, Uri, window } from "vscode";
+import * as vscode from "vscode";
 import { getSelectedText, replaceText } from "../handlers/activeEditorHandler";
 import { getRootEnvFile } from "../handlers/envHandler";
+import { Buttons, Messages } from "../utilities/constants";
 
 export async function addToEnv() {
-  let { envFile, rootFolder } = await getRootEnvFile();
+  const { envFile, rootFolder } = await getRootEnvFile();
   if (envFile !== undefined) {
     await addLineToEnv(envFile);
   } else {
-    const response = await window.showWarningMessage(`Could not find .env file in ${rootFolder.uri.path} folder. Do you want to create one?`, "Create .env", "Dismiss");
-    if (response === "Create .env") {
-      window.withProgress(
-        {
-          location: ProgressLocation.Notification,
-          cancellable: false,
-          title: ".env Manager: Creating .env file...",
-        },
-        async (progress) => {
-          try {
-            let newEnvFile = path.join(rootFolder.uri.fsPath, ".env");
-            progress.report({ message: "Creating .env file..." });
-            await fs.writeFile(newEnvFile, "", "utf-8");
-            let result = await getRootEnvFile();
-            if (result.envFile === undefined) {
-              throw new Error("Error creating .env file");
+    if (rootFolder) {
+      const response = await vscode.window.showWarningMessage(`Could not find .env file in ${rootFolder} folder. Do you want to create one?`, Buttons.CREATE_ENV, Buttons.DISMISS);
+      if (response === Buttons.CREATE_ENV) {
+        vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            cancellable: false,
+            title: Messages.CREATING_FILE,
+          },
+          async (progress) => {
+            try {
+              if (rootFolder) {
+                const newEnvFile = path.join(rootFolder.path, ".env");
+                progress.report({ message: Messages.CREATING_FILE });
+                await fs.writeFile(newEnvFile, "", "utf-8");
+                const result = await getRootEnvFile();
+                if (result.envFile === undefined) {
+                  throw new Error(Messages.UNABLE_TO_CREATE_FILE);
+                }
+                progress.report({ message: Messages.ADDING_VARIABLE_TO_ENV });
+
+                addLineToEnv(result.envFile);
+
+                const p = new Promise<void>((resolve) => {
+                  resolve();
+                });
+
+                return p;
+              }
+            } catch (e) {
+              console.log(e);
+              vscode.window.showErrorMessage(Messages.UNABLE_TO_CREATE_FILE);
             }
-            progress.report({ message: "Adding variable to .env file.." });
-
-            addLineToEnv(result.envFile);
-
-            const p = new Promise<void>((resolve) => {
-              resolve();
-            });
-
-            return p;
-          } catch (e) {
-            console.log(e);
-            window.showErrorMessage("Unable to create .env file. Please create .env file manually and try again.");
           }
-        }
-      );
+        );
+      }
+    } else {
+      const result = await vscode.window.showWarningMessage(Messages.NEED_WORKSPACE, Buttons.OPEN_FOLDER, Buttons.DISMISS);
+      if (result === Buttons.OPEN_FOLDER) {
+        await vscode.commands.executeCommand(Messages.OPEN_FOLDER_COMMAND);
+      }
     }
   }
 }
 
-async function addLineToEnv(envFile: Uri) {
-  let envVariable = "VAR_NAME";
+async function addLineToEnv(envFile: vscode.Uri) {
+  let envVariable = Messages.DEFAULT_VAR_NAME;
 
   envVariable =
-    (await window.showInputBox({
+    (await vscode.window.showInputBox({
       ignoreFocusOut: true,
       placeHolder: envVariable,
-      prompt: `Enter a name for environment variable`,
-      title: ".env Manager: Add to .env",
+      prompt: Messages.NAME_FOR_VARIABLE,
+      title: Messages.ADD_TO_ENV,
       value: envVariable,
       valueSelection: [0, envVariable.length],
       validateInput: (text) => {
-        return text === undefined || text.length === 0 ? "Variable name cannot be empty!" : null;
+        return text === undefined || text.length === 0 ? Messages.VARIABLE_CANNOT_BE_EMPTY : null;
       },
     })) || "";
 
@@ -69,28 +79,28 @@ async function addLineToEnv(envFile: Uri) {
   let selectedText = getSelectedText();
   if (selectedText.length === 0) {
     selectedText =
-      (await window.showInputBox({
+      (await vscode.window.showInputBox({
         ignoreFocusOut: true,
-        placeHolder: "VALUE",
-        prompt: `Enter value for environment variable`,
-        title: ".env Manager: Add to .env",
+        placeHolder: Messages.DEFAULT_VALUE_NAME,
+        prompt: Messages.NAME_FOR_VALUE,
+        title: Messages.ADD_TO_ENV,
         value: "",
         valueSelection: undefined,
         validateInput: (text) => {
-          return text === undefined || text.length === 0 ? "Value cannot be empty!" : null;
+          return text === undefined || text.length === 0 ? Messages.VALUE_CANNOT_BE_EMPTY : null;
         },
       })) || "";
   }
   if (selectedText.trim().length === 0) {
     return;
   }
-  let includeInQuotes = /\s/.test(selectedText);
-  let envValue = includeInQuotes ? `'${selectedText}'` : selectedText;
+  const includeInQuotes = /\s/.test(selectedText);
+  const envValue = includeInQuotes ? `'${selectedText}'` : selectedText;
 
-  let envLine = `${envVariable}=${envValue}`;
+  const envLine = `${envVariable}=${envValue}`;
 
-  await fs.appendFile(envFile.fsPath, `${envLine}${os.EOL}`, "utf8");
+  await fs.appendFile(envFile.fsPath, `${envLine}${os.EOL}`);
   replaceText(envVariable);
 
-  window.showInformationMessage(`.env Manager: Added ${envVariable} to .env`);
+  vscode.window.showInformationMessage(`.env Manager: Added ${envVariable} to .env`);
 }

@@ -3,14 +3,30 @@
   "displayName": ".env Manager",
   "description": ".env Manager",
   "publisher": "onlyutkarsh",
+  "author": "Utkarsh Shigihalli",
   "version": "0.0.1",
-  "icon": "img/icon.png",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#F2F2F2",
+    "theme": "light"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onlyutkarsh/envmanager"
+  },
   "engines": {
     "vscode": "^1.55.0"
   },
   "categories": [
     "Other"
   ],
+  "keywords": [
+    ".env",
+    "environment",
+    "development",
+    "productivity"
+  ],
+  "license": "gpl-3.0",
   "activationEvents": [
     "onCommand:envmanager.addToEnv"
   ],
@@ -25,7 +41,6 @@
     "menus": {
       "editor/context": [
         {
-          "when": "editorHasSelection",
           "command": "envmanager.addToEnv",
           "group": "envManagerMenus@1"
         }

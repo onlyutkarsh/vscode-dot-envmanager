@@ -1,23 +1,28 @@
 import { TextDecoder } from "util";
-import { Uri, workspace, WorkspaceFolder } from "vscode";
+import * as vscode from "vscode";
 
-export async function getRootEnvFile(): Promise<{ envFile: Uri; rootFolder: WorkspaceFolder }> {
-  let [envFile] = await workspace.findFiles("*.env", undefined, 1);
-  let [rootFolder] = workspace.workspaceFolders as WorkspaceFolder[];
+export async function getRootEnvFile(): Promise<{ envFile: vscode.Uri; rootFolder: vscode.Uri | undefined }> {
+  const [envFile] = await vscode.workspace.findFiles("*.env", undefined, 1);
+  let rootFolder = undefined;
+  if (vscode.workspace.workspaceFolders) {
+    // a workspace is open
+    rootFolder = vscode.workspace.workspaceFolders[0].uri;
+    return { envFile, rootFolder };
+  }
   return { envFile, rootFolder };
 }
 
-export async function getEnvContent(envFile: Uri) {
-  return workspace.fs.readFile(envFile);
+export async function getEnvContent(envFile: vscode.Uri) {
+  return vscode.workspace.fs.readFile(envFile);
 }
 
-export async function getEnvContentAsString(envFile: Uri) {
-  return new TextDecoder("utf-8").decode(await workspace.fs.readFile(envFile));
+export async function getEnvContentAsString(envFile: vscode.Uri) {
+  return new TextDecoder("utf-8").decode(await vscode.workspace.fs.readFile(envFile));
 }
 
-export async function fileExists(envFile: Uri) {
+export async function fileExists(envFile: vscode.Uri) {
   try {
-    const file = await workspace.fs.stat(envFile);
+    const file = await vscode.workspace.fs.stat(envFile);
     return file.size !== 0;
   } catch (error) {
     return false;
