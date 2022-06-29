@@ -19,8 +19,7 @@
     "commands": [
       {
         "command": "envmanager.addToEnv",
-        "title": ".env Manager: Add to .env",
-        "enablement": "editorHasSelection"
+        "title": ".env Manager: Add to .env"
       }
     ],
     "menus": {
