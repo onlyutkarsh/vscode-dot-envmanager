@@ -23,3 +23,7 @@ If the folder does not contain `.env` file at the root, the extension attempts t
 The extension pushes the logs in to its own Output channel called, `.env Manager`. If you encounter any issues, raise the issue in GitHub repo and paste the contents of Output channel for analysis and easy troubleshooting.
 
 ![log window](images/marketplace/logwindow.jpg)
+
+## Social
+
+[![Twitter](https://img.shields.io/badge/Twitter-%231DA1F2.svg?style=for-the-badge&logo=Twitter&logoColor=white)](https://twitter.com/onlyutkarsh) [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/onlyutkarsh)
