@@ -23,13 +23,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set VERSION variable to ${{ env.BASE_VERSION }}.${{ github.run_number }}
-        run: echo "VERSION=${{ env.BASE_VERSION }}.${{ github.run_number }}" >> $GITHUB_ENV
-
       - name: setup node
         uses: actions/setup-node@v2.5.1
         with:
-          node-version: "16.x"
+          node-version: "18.x"
 
       - name: 💎 install cached dependencies
         uses: actions/cache@v2
@@ -42,11 +39,7 @@ jobs:
       - name: 🚧 install dependencies
         run: npm install
 
-      - name: update metadata in package.json
-        run: |
-          sed -i -e "s/\"version\": \".*\"/\"version\": \"${{ env.VERSION }}\"/g" package.json
-
-      - name: Release
+      - name: semantic release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
