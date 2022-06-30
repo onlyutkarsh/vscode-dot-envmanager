@@ -46,6 +46,7 @@ jobs:
         run: npm run package
 
       - name: 🚀 publish to marketplace
+        if: success()
         uses: HaaLeo/publish-vscode-extension@v1
         with:
           pat: ${{ secrets.VS_MARKETPLACE_PAT }}
