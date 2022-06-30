@@ -47,9 +47,6 @@ jobs:
 
       - name: 🚀 publish to marketplace
         if: success()
-        uses: HaaLeo/publish-vscode-extension@v1
-        with:
-          pat: ${{ secrets.VS_MARKETPLACE_PAT }}
-          registryUrl: https://marketplace.visualstudio.com
-          extensionFile: ./${{ env.EXTENSION_SLUG }}-*.vsix
-          packagePath: ""
+        run: npm run deploy
+        env:
+          VSCE_PAT: ${{ secrets.VS_MARKETPLACE_PAT }}

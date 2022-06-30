@@ -63,7 +63,7 @@
     "compile": "tsc -p ./src",
     "dev": "npm run compile && npm run esbuild-watch",
     "package": "vsce package",
-    "deploy": "vsce publish -p",
+    "deploy": "vsce publish",
     "clean": "git clean -fdX",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
