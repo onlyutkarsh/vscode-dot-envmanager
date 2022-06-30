@@ -7,6 +7,10 @@ on:
         required: false
         description: Publish to VS Marketplace (true/false - default is false)
         default: false
+  push:
+    branches:
+      - "main"
+
 env:
   BASE_VERSION: 1.0
   EXTENSION_NAME: .env Manager
