@@ -21,3 +21,5 @@ marketplace/
 jest.config.js
 coverage/
 test/
+.releaserc
+.env
