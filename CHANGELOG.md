@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/onlyutkarsh/vscode-dot-envmanager/compare/v1.1.0...v1.1.1) (2022-06-30)
+
+
+### Bug Fixes
+
+* repo url ([3229160](https://github.com/onlyutkarsh/vscode-dot-envmanager/commit/322916021c4a98628fe232b66c79221d3b3b63c6))
+
 # [1.1.0](https://github.com/onlyutkarsh/envmanager/compare/v1.0.0...v1.1.0) (2022-06-30)
 
 
