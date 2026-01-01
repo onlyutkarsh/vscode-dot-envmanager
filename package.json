@@ -150,7 +150,7 @@
     "@types/node": "^18.0.0",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^5.30.0",
-    "@typescript-eslint/parser": "^5.30.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "@vscode/test-electron": "^2.1.5",
     "@vscode/vsce": "^3.7.1",
     "conventional-changelog-cli": "^5.0.0",
