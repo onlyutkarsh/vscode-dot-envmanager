@@ -4,6 +4,9 @@ export const Buttons = {
   OPEN_FOLDER: "Open Folder",
   DISMISS: "Dismiss",
   CREATE_ENV: "Create .env",
+  OVERWRITE: "Overwrite",
+  CANCEL: "Cancel",
+  ADD_TO_GITIGNORE: "Add to .gitignore",
 };
 export const Application = {
   APPLICATION_NAME: ".env Manager",
@@ -21,4 +24,6 @@ export const Messages = {
   ADD_TO_ENV: `${Application.APPLICATION_NAME}: Add to .env`,
   VARIABLE_CANNOT_BE_EMPTY: "Variable name cannot be empty!",
   VALUE_CANNOT_BE_EMPTY: "Value cannot be empty!",
+  INVALID_VARIABLE_NAME: "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores.",
+  VARIABLE_NAME_CONVENTION_WARNING: "Convention: use UPPERCASE for environment variables (e.g., API_KEY)",
 };

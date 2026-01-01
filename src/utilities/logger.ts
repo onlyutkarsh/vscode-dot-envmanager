@@ -1,18 +1,15 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2017 Esben Petersen
- *  Licensed under the MIT License.
- *  See https://github.com/prettier/prettier-vscode/blob/master/LICENSE for license information.
- *--------------------------------------------------------------------------------------------*/
-
-import { OutputChannel, window } from "vscode";
+import { LogOutputChannel, window, Disposable } from "vscode";
 import { Application } from "./constants";
-import { Disposable } from "./disposable";
 
-type LogLevel = "INFO" | "WARN" | "ERROR";
+type Loggable = Record<string, unknown> | unknown[] | string | number | boolean | undefined | null | Error;
 
-export class Logger extends Disposable {
-  private outputChannel: OutputChannel | undefined;
-  private static _instance: Logger;
+export class Logger implements Disposable {
+  private static _instance: Logger | undefined;
+  private readonly channel: LogOutputChannel;
+
+  private constructor() {
+    this.channel = window.createOutputChannel(Application.APPLICATION_NAME, { log: true });
+  }
 
   static get instance(): Logger {
     if (!Logger._instance) {
@@ -21,79 +18,74 @@ export class Logger extends Disposable {
     return Logger._instance;
   }
 
-  private constructor() {
-    super();
-    this.outputChannel = window.createOutputChannel(Application.APPLICATION_NAME);
-    this.registerDisposable(this.outputChannel);
+  dispose(): void {
+    this.channel.dispose();
   }
 
-  /**
-   * Append messages to the output channel and format it with a title
-   *
-   * @param message The message to append to the output channel
-   */
-  public logInfo(message: string, data?: object): void {
-    this.logMessage(message, "INFO");
-    if (data) {
-      this.logObject(data);
+  show(): void {
+    this.channel.show();
+  }
+
+  logInfo(message: string, data?: Loggable): void {
+    this.channel.info(message);
+    if (data !== undefined) {
+      this.channel.info(this.stringify(data));
     }
   }
 
-  /**
-   * Append messages to the output channel and format it with a title
-   *
-   * @param message The message to append to the output channel
-   */
-  public logWarning(message: string, data?: object): void {
-    this.logMessage(message, "WARN");
-    if (data) {
-      this.logObject(data);
+  logWarning(message: string, data?: Loggable): void {
+    this.channel.warn(message);
+    if (data !== undefined) {
+      this.channel.warn(this.stringify(data));
     }
   }
 
-  public logError(message: string, error?: Error | string) {
-    this.logMessage(message, "ERROR");
-
-    if (!this.outputChannel) {
-      return;
+  logDebug(category: string, message: string, context?: Loggable): void {
+    const prefix = `[${category}] ${message}`;
+    this.channel.debug(prefix);
+    if (context !== undefined) {
+      this.channel.debug(`  Context: ${this.stringify(context)}`);
     }
+  }
 
+  logError(message: string, error?: Loggable): void {
+    this.channel.error(message);
     if (error instanceof Error) {
       if (error.message) {
-        this.outputChannel.appendLine(error.message);
+        this.channel.error(error.message);
       }
       if (error.stack) {
-        this.outputChannel.appendLine(error.stack);
+        this.channel.error(error.stack);
       }
-    } else if (error) {
-      this.outputChannel.appendLine(error);
-    }
-  }
-
-  public show() {
-    if (!this.outputChannel) {
       return;
     }
 
-    this.outputChannel.show();
-  }
-
-  private logObject(data: object): void {
-    if (this.outputChannel) {
-      const message = JSON.stringify(data, null, 2).trim();
-      this.outputChannel.appendLine(message);
+    if (error !== undefined) {
+      this.channel.error(this.stringify(error));
     }
   }
 
-  /**
-   * Append messages to the output channel and format it with a title
-   *
-   * @param message The message to append to the output channel
-   */
-  private logMessage(message: string, logLevel: LogLevel): void {
-    if (this.outputChannel) {
-      const title = new Date().toLocaleTimeString();
-      this.outputChannel.appendLine(`[${logLevel} - ${title}] ${message}`);
+  private stringify(data: Loggable): string {
+    if (data === undefined || data === null) {
+      return String(data);
+    }
+
+    if (data instanceof Error) {
+      return data.stack ?? data.message ?? data.toString();
+    }
+
+    if (typeof data === "string") {
+      return data;
+    }
+
+    if (typeof data === "number" || typeof data === "boolean") {
+      return JSON.stringify(data);
+    }
+
+    try {
+      return JSON.stringify(data, null, 2);
+    } catch (error) {
+      return `[[Unable to stringify log payload: ${error}]]`;
     }
   }
 }

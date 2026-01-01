@@ -1,5 +1,7 @@
-import { Selection, window } from "vscode";
+import { Selection, window, workspace } from "vscode";
 import { Logger } from "../utilities/logger";
+import { suggestEnvVarFormat } from "../utilities/stringUtilities";
+
 export function getSelectedText(): string {
   Logger.instance.logInfo("Getting selected text from editor");
   const editor = window.activeTextEditor;
@@ -16,10 +18,32 @@ export function getSelectedText(): string {
   return selectedText;
 }
 
-export function replaceText(newText: string) {
+export function getCurrentLanguageId(): string | undefined {
+  const editor = window.activeTextEditor;
+  if (editor) {
+    return editor.document.languageId;
+  }
+  return undefined;
+}
+
+export function replaceText(variableName: string, useLanguageSpecificFormat: boolean = true) {
   Logger.instance.logInfo("Replacing text in the editor");
   const editor = window.activeTextEditor;
   if (editor) {
+    const languageId = editor.document.languageId;
+
+    // Read configuration
+    const config = workspace.getConfiguration("envmanager");
+    const enableFormatting = config.get<boolean>("enableLanguageSpecificFormat", true);
+    const formatConfig = config.get<Record<string, string>>("variableFormat");
+
+    let newText = variableName;
+    if (useLanguageSpecificFormat && enableFormatting) {
+      newText = suggestEnvVarFormat(variableName, languageId, formatConfig);
+    }
+
+    Logger.instance.logInfo(`Replacing with: ${newText} (language: ${languageId}, formatting: ${enableFormatting})`);
+
     const selection = editor.selection;
     editor.edit((editBuilder) => {
       editBuilder.replace(selection, newText);

@@ -1,52 +1,182 @@
-name: release
+name: Release to Marketplace
 
 on:
-  push:
-    branches:
-      - "main"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number (e.g., 1.2.0)"
+        required: true
+        type: string
 
-env:
-  BASE_VERSION: 1.0
-  EXTENSION_NAME: .env Manager
-  EXTENSION_DESC: "Quick and easy way to add entries to your .env file"
-  EXTENSION_SLUG: envmanager
+run-name: Release v${{ inputs.version }}
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
+    if: github.actor == 'onlyutkarsh'
+    permissions:
+      contents: write
+
     steps:
-      - name: checkout repo with all histrory and tags
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: setup node
-        uses: actions/setup-node@v2.5.1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: "20.x"
+          cache: npm
 
-      - name: 💎 install cached dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ secrets.CACHE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: 🚧 install dependencies
-        run: npm install
+      - name: Validate version format
+        run: |
+          if ! [[ "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Version must be in format X.Y.Z (e.g., 1.2.0)"
+            exit 1
+          fi
 
-      - name: semantic release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+      - name: Check if tag already exists
+        run: |
+          if git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "Error: Tag v${{ inputs.version }} already exists"
+            exit 1
+          fi
 
-      - name: 📦 compile and create vsix
+      - name: Update package.json version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          if [ "$CURRENT_VERSION" != "${{ inputs.version }}" ]; then
+            npm version ${{ inputs.version }} --no-git-tag-version
+          else
+            echo "Version is already ${{ inputs.version }}, skipping version update"
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile TypeScript
+        run: npm run compile
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Build extension
         run: npm run package
 
-      - name: 🚀 publish to marketplace
-        if: success()
+      - name: Update Changelog
+        run: |
+          npx conventional-changelog -p angular -i CHANGELOG.md -s -r 0
+          # Normalize all version headers to use ## (consistent level 2 headers)
+          sed -i 's/^# \(\[[0-9]\)/## \1/g' CHANGELOG.md
+
+      - name: Publish to Open VSX Registry
+        id: publish_ovsx
+        continue-on-error: true
+        run: npm run publish:ovsx
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
+      - name: Publish to VS Marketplace
+        id: publish_vsmarketplace
+        continue-on-error: true
         run: npm run deploy
         env:
           VSCE_PAT: ${{ secrets.VS_MARKETPLACE_PAT }}
+
+      - name: Check publishing results
+        run: |
+          if [ "${{ steps.publish_ovsx.outcome }}" == "failure" ]; then
+            echo "⚠️ Open VSX publishing failed (version may already exist)"
+          fi
+          if [ "${{ steps.publish_vsmarketplace.outcome }}" == "failure" ]; then
+            echo "⚠️ VS Marketplace publishing failed (version may already exist)"
+          fi
+          if [ "${{ steps.publish_ovsx.outcome }}" == "failure" ] && [ "${{ steps.publish_vsmarketplace.outcome }}" == "failure" ]; then
+            echo "❌ Both publishing steps failed. Please check the logs."
+            exit 1
+          fi
+
+      - name: Commit version bump and changelog
+        run: |
+          git add package.json package-lock.json CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit, skipping"
+          else
+            git commit -m "chore(release): v${{ inputs.version }}"
+            git push origin main
+          fi
+
+      - name: Create and push tag
+        run: |
+          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
+
+      - name: Extract changelog for release
+        id: extract_changelog
+        run: |
+          VERSION="${{ inputs.version }}"
+          # Extract the section for this version from CHANGELOG.md
+          # All version headers should now be ## (level 2) after normalization
+          CHANGELOG_SECTION=$(awk -v ver="$VERSION" '
+            /^## \[/ {
+              if (found) exit
+              if ($0 ~ "\\[" ver "\\]") {
+                found=1
+                next
+              }
+            }
+            found && /^###/ { print; next }
+            found && /^\*/ { print; next }
+            found && /^$/ && prev != "" { print; prev="" }
+            found && !/^$/ { print; prev=$0 }
+          ' CHANGELOG.md)
+
+          if [ -z "$CHANGELOG_SECTION" ]; then
+            echo "No changelog content found, will use auto-generated notes only"
+            echo "has_changelog=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changelog=true" >> $GITHUB_OUTPUT
+            {
+              echo "changelog_content<<EOF_CHANGELOG"
+              echo "$CHANGELOG_SECTION"
+              echo "EOF_CHANGELOG"
+            } >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ inputs.version }}
+          name: Release v${{ inputs.version }}
+          draft: false
+          prerelease: false
+          files: "*.vsix"
+          body: ${{ steps.extract_changelog.outputs.has_changelog == 'true' && steps.extract_changelog.outputs.changelog_content || '' }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "### Release Summary :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** v${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.publish_ovsx.outcome }}" == "success" ]; then
+            echo "✅ Published to Open VSX Registry" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Open VSX Registry publishing failed or skipped" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ steps.publish_vsmarketplace.outcome }}" == "success" ]; then
+            echo "✅ Published to VS Marketplace" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ VS Marketplace publishing failed or skipped" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "✅ GitHub Release created" >> $GITHUB_STEP_SUMMARY
