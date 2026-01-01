@@ -26,7 +26,7 @@ export function getCurrentLanguageId(): string | undefined {
   return undefined;
 }
 
-export function replaceText(variableName: string, useLanguageSpecificFormat: boolean = true) {
+export function replaceText(variableName: string, useLanguageSpecificFormat = true) {
   Logger.instance.logInfo("Replacing text in the editor");
   const editor = window.activeTextEditor;
   if (editor) {
