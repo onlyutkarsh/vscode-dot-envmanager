@@ -1,3 +1,17 @@
+## [1.2.1](https://github.com/onlyutkarsh/vscode-dot-envmanager/compare/v1.2.0...v1.2.1) (2026-01-01)
+
+
+### Bug Fixes
+
+* update image URLs in README to use refs/heads for consistency ([ee843f6](https://github.com/onlyutkarsh/vscode-dot-envmanager/commit/ee843f698c6998e100e0ce7b171dd3a8e9fcb4bb))
+
+
+### Features
+
+* enhance .env management with language support, syntax highlighting, and improved configuration ([3515b0b](https://github.com/onlyutkarsh/vscode-dot-envmanager/commit/3515b0b6d589a32c450b99f9a62c333b7901b3cf))
+
+
+
 ## [1.2.0](https://github.com/onlyutkarsh/vscode-dot-envmanager/compare/v1.1.1...v1.2.0) (2026-01-01)
 
 
