@@ -4,7 +4,7 @@
   "description": "Quick and easy way to add entries to your .env file",
   "publisher": "onlyutkarsh",
   "author": "Utkarsh Shigihalli",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "icon": "images/icon.png",
   "galleryBanner": {
     "color": "#F2F2F2",
