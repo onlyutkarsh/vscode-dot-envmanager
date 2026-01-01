@@ -2,7 +2,7 @@
 
 Do you use `.env` files to manage your environment variables in your local dev environment? Use this extension to quickly add values to `.env` file and automatically sync them to `.env.example` files for your team. Checkout the quick demo of its working below.
 
-![demo](https://raw.githubusercontent.com/onlyutkarsh/vscode-dot-envmanager/main/marketplace/demo.gif)
+![demo](https://raw.githubusercontent.com/onlyutkarsh/vscode-dot-envmanager/refs/heads/main/marketplace/demo.gif)
 
 ## Features
 
@@ -38,7 +38,7 @@ This will automatically sync:
 
 The extension exposes a command called `.env Manager: Add to .env`. The command is available in VS Code "Command Palette" which you can also access using shortcut <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> on Mac.
 
-![command palette](https://raw.githubusercontent.com/onlyutkarsh/vscode-dot-envmanager/main/marketplace/command-palette.jpg)
+![command palette](https://raw.githubusercontent.com/onlyutkarsh/vscode-dot-envmanager/refs/heads/main/marketplace/command-palette.jpg)
 
 Alternatively you can also right click on any active editor and select `.env Manager: Add to .env` from the context menu.
 
@@ -116,8 +116,5 @@ API_KEY=<your-value-here>
 
 The extension pushes the logs in to its own Output channel called, `.env Manager`. If you encounter any issues, raise the issue in GitHub repo and paste the contents of Output channel for analysis and easy troubleshooting.
 
-![log window](https://raw.githubusercontent.com/onlyutkarsh/vscode-dot-envmanager/main/marketplace/logwindow.jpg)
+![log window](https://raw.githubusercontent.com/onlyutkarsh/vscode-dot-envmanager/refs/heads/main/marketplace/logwindow.jpg)
 
-## Social
-
-[![Twitter](https://img.shields.io/badge/Twitter-%231DA1F2.svg?style=for-the-badge&logo=Twitter&logoColor=white)](https://twitter.com/onlyutkarsh) [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/onlyutkarsh)
