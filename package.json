@@ -15,7 +15,7 @@
     "url": "https://github.com/onlyutkarsh/vscode-dot-envmanager"
   },
   "engines": {
-    "vscode": "^1.55.0"
+    "vscode": "^1.85.0"
   },
   "categories": [
     "Other"
@@ -28,7 +28,7 @@
   ],
   "license": "gpl-3.0",
   "activationEvents": [
-    "onCommand:envmanager.addToEnv"
+    "onStartupFinished"
   ],
   "capabilities": {
     "untrustedWorkspaces": {
@@ -44,45 +44,121 @@
       {
         "command": "envmanager.addToEnv",
         "title": ".env Manager: Add to .env"
+      },
+      {
+        "command": "envmanager.syncToExample",
+        "title": ".env Manager: Sync to Example Files"
       }
     ],
     "menus": {
       "editor/context": [
         {
           "command": "envmanager.addToEnv",
-          "group": "envManagerMenus@1"
+          "group": "envManagerMenus@1",
+          "when": "editorHasSelection"
         }
       ]
+    },
+    "keybindings": [],
+    "configuration": {
+      "title": ".env Manager",
+      "properties": {
+        "envmanager.variableFormat": {
+          "type": "object",
+          "default": {
+            "javascript": "process.env.${VAR_NAME}",
+            "typescript": "process.env.${VAR_NAME}",
+            "javascriptreact": "process.env.${VAR_NAME}",
+            "typescriptreact": "process.env.${VAR_NAME}",
+            "powershell": "$env:${VAR_NAME}",
+            "shellscript": "$${VAR_NAME}",
+            "bash": "$${VAR_NAME}",
+            "sh": "$${VAR_NAME}",
+            "python": "os.getenv('${VAR_NAME}')",
+            "ruby": "ENV['${VAR_NAME}']",
+            "go": "os.Getenv(\"${VAR_NAME}\")",
+            "rust": "env::var(\"${VAR_NAME}\")",
+            "php": "$_ENV['${VAR_NAME}']",
+            "java": "System.getenv(\"${VAR_NAME}\")",
+            "csharp": "Environment.GetEnvironmentVariable(\"${VAR_NAME}\")",
+            "vue": "import.meta.env.${VAR_NAME}",
+            "dockerfile": "$${VAR_NAME}",
+            "yaml": "${{ secrets.${VAR_NAME} }}",
+            "yml": "${{ secrets.${VAR_NAME} }}",
+            "bat": "%${VAR_NAME}%",
+            "cmd": "%${VAR_NAME}%"
+          },
+          "scope": "resource",
+          "markdownDescription": "Format template for environment variable replacement by language. Use `${VAR_NAME}` as placeholder for the variable name.\n\n**Example - Override specific languages:**\n```json\n{\n  \"python\": \"os.environ.get('${VAR_NAME}')\",\n  \"javascript\": \"import.meta.env.${VAR_NAME}\"\n}\n```\n\n**Note:** Your custom settings are merged with built-in defaults. You only need to specify languages you want to override - all other languages will continue using their default formats.",
+          "patternProperties": {
+            ".*": {
+              "type": "string",
+              "description": "Template string where ${VAR_NAME} will be replaced with the actual variable name"
+            }
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "envmanager.enableLanguageSpecificFormat": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Enable language-specific formatting when replacing variables. If disabled, only the variable name will be inserted."
+        },
+        "envmanager.syncMappings": {
+          "type": "object",
+          "default": {},
+          "scope": "resource",
+          "markdownDescription": "Define mappings between .env files and their corresponding example files. Sync happens automatically on save when mappings are configured. **Sync is disabled by default.**\n\n**Quick Start - Recommended:**\n```json\n{\n  \".env\": [\".env.example\"],\n  \".env.*\": [\".env.*.example\"]\n}\n```\nThis syncs `.env` to `.env.example` and all environment variants (`.env.production`, `.env.staging`, etc.) to their corresponding example files.\n\n**Custom mappings:**\n```json\n{\n  \".env\": [\".env.example\", \".env.sample\"],\n  \".env.production\": [\".env.production.example\"],\n  \".env.local\": [\".env.local.example\"]\n}\n```\n\n**To disable:** Leave empty `{}` (default) or set to `null`",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "envmanager.exampleFilePlaceholder": {
+          "type": "string",
+          "default": "<your-value-here>",
+          "scope": "resource",
+          "description": "Placeholder value to use in example files when syncing variables. Examples: '<your-value-here>', 'TODO', 'CHANGE_ME', or leave empty for blank values."
+        }
+      }
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run -S esbuild-base -- --minify",
-    "esbuild-base": "rimraf out && esbuild ./src/extension.ts --tsconfig=src/tsconfig.json --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "rimraf out && esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run -S esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run -S esbuild-base -- --sourcemap --watch",
-    "compile": "tsc -p ./src",
-    "dev": "npm run compile && npm run esbuild-watch",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
     "package": "vsce package",
     "deploy": "vsce publish",
+    "publish:ovsx": "ovsx publish",
     "clean": "git clean -fdX",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/git": "^10.0.1",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
     "@types/node": "^18.0.0",
-    "@types/vscode": "^1.55.0",
-    "@semantic-release/changelog": "^6.0.1",
-    "@semantic-release/git": "^10.0.1",
+    "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^5.30.0",
     "@typescript-eslint/parser": "^5.30.0",
     "@vscode/test-electron": "^2.1.5",
+    "@vscode/vsce": "^3.7.1",
+    "conventional-changelog-cli": "^5.0.0",
     "esbuild": "^0.14.48",
     "eslint": "^8.18.0",
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
+    "ovsx": "^0.10.7",
     "prettier": "^2.7.1",
     "typescript": "^4.7.4",
     "vsce": "^2.9.2"
