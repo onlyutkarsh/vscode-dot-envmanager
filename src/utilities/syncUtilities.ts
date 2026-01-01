@@ -61,23 +61,6 @@ export function isActualEnvFile(fileName: string): boolean {
 }
 
 /**
- * Resolves wildcard patterns in example file names
- * Example: ".env.*" matching ".env.production" → [".env.*.example"] → [".env.production.example"]
- */
-function resolveExampleFilePattern(envFileName: string, examplePattern: string): string {
-  // If pattern contains *, replace it with the corresponding part from envFileName
-  if (examplePattern.includes("*")) {
-    // Extract the suffix from the env file (e.g., ".production" from ".env.production")
-    const envMatch = envFileName.match(/^\.env(\..+)?$/);
-    if (envMatch && envMatch[1]) {
-      // Replace * with the suffix
-      return examplePattern.replace("*", envMatch[1].substring(1)); // Remove leading dot
-    }
-  }
-  return examplePattern;
-}
-
-/**
  * Gets the corresponding example files for a given .env file based on mappings
  */
 export async function getExampleFilesForEnv(envFilePath: string): Promise<vscode.Uri[]> {
@@ -86,45 +69,19 @@ export async function getExampleFilesForEnv(envFilePath: string): Promise<vscode
   const fileName = path.basename(envFilePath);
   const exampleFiles: vscode.Uri[] = [];
 
-  // First, try exact match in mappings
-  let examplePatterns: string[] | undefined = config.mappings[fileName];
+  // Get exact match from mappings
+  const exampleFileNames = config.mappings[fileName];
 
-  // If no exact match, try wildcard patterns
-  if (!examplePatterns) {
-    for (const [pattern, examples] of Object.entries(config.mappings)) {
-      if (pattern.includes("*")) {
-        // Convert pattern to regex (e.g., ".env.*" → /^\.env\..+$/)
-        const regexPattern = pattern
-          .replace(/\./g, "\\.")
-          .replace(/\*/g, ".+");
-        const regex = new RegExp(`^${regexPattern}$`);
-
-        if (regex.test(fileName)) {
-          examplePatterns = examples;
-          break;
-        }
-      }
-    }
-  }
-
-  // If still no match, return empty array
-  if (!examplePatterns || examplePatterns.length === 0) {
+  // If no match, return empty array
+  if (!exampleFileNames || exampleFileNames.length === 0) {
     return exampleFiles;
   }
 
-  // Resolve patterns and check if files exist
-  for (const pattern of examplePatterns) {
-    const resolvedName = resolveExampleFilePattern(fileName, pattern);
-    const examplePath = path.join(dirPath, resolvedName);
+  // Create URIs for each example file
+  for (const exampleFileName of exampleFileNames) {
+    const examplePath = path.join(dirPath, exampleFileName);
     const exampleUri = vscode.Uri.file(examplePath);
-
-    try {
-      await vscode.workspace.fs.stat(exampleUri);
-      exampleFiles.push(exampleUri);
-    } catch {
-      // File doesn't exist, but we should still create it during sync
-      exampleFiles.push(exampleUri);
-    }
+    exampleFiles.push(exampleUri);
   }
 
   return exampleFiles;

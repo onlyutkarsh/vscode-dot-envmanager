@@ -1,6 +1,5 @@
 import { commands, Disposable } from "vscode";
 import { addToEnv } from "../commands/addToEnvCommand";
-import { syncToExample } from "../commands/syncToExampleCommand";
 import { Logger } from "../utilities/logger";
 export default class CommandsHandler {
   private commandsList: Disposable[] = [];
@@ -8,7 +7,6 @@ export default class CommandsHandler {
   constructor() {
     Logger.instance.logInfo("Registering commands");
     this.registerCommand("envmanager.addToEnv", () => addToEnv());
-    this.registerCommand("envmanager.syncToExample", () => syncToExample());
   }
 
   public getCommands = () => this.commandsList;

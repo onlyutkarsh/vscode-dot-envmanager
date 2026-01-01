@@ -40,14 +40,50 @@
   },
   "main": "./out/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "dotenv",
+        "aliases": [
+          "Environment Variables",
+          "dotenv",
+          ".env"
+        ],
+        "extensions": [
+          ".env",
+          ".env.example",
+          ".env.sample",
+          ".env.template",
+          ".env.local",
+          ".env.development",
+          ".env.production",
+          ".env.staging",
+          ".env.test"
+        ],
+        "filenames": [
+          ".env",
+          ".env.example",
+          ".env.sample",
+          ".env.template",
+          ".env.local",
+          ".env.development",
+          ".env.production",
+          ".env.staging",
+          ".env.test"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "dotenv",
+        "scopeName": "source.dotenv",
+        "path": "./syntaxes/dotenv.tmLanguage.json"
+      }
+    ],
     "commands": [
       {
         "command": "envmanager.addToEnv",
         "title": ".env Manager: Add to .env"
-      },
-      {
-        "command": "envmanager.syncToExample",
-        "title": ".env Manager: Sync to Example Files"
       }
     ],
     "menus": {

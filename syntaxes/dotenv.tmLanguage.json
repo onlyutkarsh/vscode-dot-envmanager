@@ -1,0 +1,103 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Environment Variables",
+  "scopeName": "source.dotenv",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#variable-assignment"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.dotenv",
+          "match": "^\\s*(#.*)$",
+          "captures": {
+            "1": {
+              "name": "comment.line.number-sign.dotenv"
+            }
+          }
+        }
+      ]
+    },
+    "variable-assignment": {
+      "patterns": [
+        {
+          "name": "meta.variable.assignment.dotenv",
+          "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*(=)\\s*(.*)$",
+          "captures": {
+            "1": {
+              "name": "variable.other.dotenv"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.dotenv"
+            },
+            "3": {
+              "patterns": [
+                {
+                  "include": "#value-quoted-double"
+                },
+                {
+                  "include": "#value-quoted-single"
+                },
+                {
+                  "include": "#value-unquoted"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "value-quoted-double": {
+      "name": "string.quoted.double.dotenv",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.dotenv",
+          "match": "\\\\[\"\\\\nrt$]"
+        },
+        {
+          "include": "#variable-substitution"
+        }
+      ]
+    },
+    "value-quoted-single": {
+      "name": "string.quoted.single.dotenv",
+      "begin": "'",
+      "end": "'",
+      "patterns": [
+        {
+          "name": "constant.character.escape.dotenv",
+          "match": "\\\\[']"
+        }
+      ]
+    },
+    "value-unquoted": {
+      "name": "string.unquoted.dotenv",
+      "match": "[^\\s#]+(\\s+[^#\\s].*)?",
+      "patterns": [
+        {
+          "include": "#variable-substitution"
+        }
+      ]
+    },
+    "variable-substitution": {
+      "patterns": [
+        {
+          "name": "variable.other.substitution.dotenv",
+          "match": "\\$\\{[A-Za-z_][A-Za-z0-9_]*\\}"
+        },
+        {
+          "name": "variable.other.substitution.dotenv",
+          "match": "\\$[A-Za-z_][A-Za-z0-9_]*"
+        }
+      ]
+    }
+  }
+}
