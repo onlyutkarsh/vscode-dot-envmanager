@@ -187,6 +187,6 @@
     "eslint": "^8.57.1",
     "ovsx": "^0.10.7",
     "prettier": "^2.7.1",
-    "typescript": "^4.7.4"
+    "typescript": "^5.9.3"
   }
 }
