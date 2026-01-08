@@ -186,7 +186,7 @@
     "esbuild": "^0.27.2",
     "eslint": "^8.57.1",
     "ovsx": "^0.10.7",
-    "prettier": "^2.7.1",
+    "prettier": "^3.7.4",
     "typescript": "^4.7.4"
   }
 }
