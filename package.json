@@ -184,7 +184,7 @@
     "@vscode/vsce": "^3.7.1",
     "conventional-changelog-cli": "^5.0.0",
     "esbuild": "^0.27.2",
-    "eslint": "^8.57.1",
+    "eslint": "^9.39.2",
     "ovsx": "^0.10.7",
     "prettier": "^2.7.1",
     "typescript": "^4.7.4"
